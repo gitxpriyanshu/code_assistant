@@ -1,0 +1,36 @@
+Common Python Import, Syntax, and Runtime Error Patterns
+
+1. ModuleNotFoundError: No module named 'x'
+   - Cause: The module is not installed, or the import path is wrong.
+   - Fix: Install the module with pip install x, or fix the import path.
+   - Best Practice: Use virtual environments and requirements.txt / pyproject.toml.
+
+2. ImportError: cannot import name 'x' from 'y'
+   - Cause: The name doesn't exist in the module, or there's a circular import.
+   - Fix: Check the module's exports. For circular imports, restructure your code or use lazy imports.
+   - Best Practice: Avoid circular dependencies by using dependency injection or restructuring.
+
+3. SyntaxError: invalid syntax
+   - Cause: Python code has invalid syntax — missing colons, brackets, or incorrect indentation.
+   - Fix: Check for missing colons after if/for/def/class, unmatched brackets, or mixed tabs/spaces.
+   - Best Practice: Use an IDE with syntax highlighting and a linter like flake8 or ruff.
+
+4. IndentationError: unexpected indent
+   - Cause: Inconsistent indentation — mixing tabs and spaces.
+   - Fix: Use only spaces (4 spaces per level is standard).
+   - Best Practice: Configure your editor to use spaces and auto-format with black.
+
+5. RecursionError: maximum recursion depth exceeded
+   - Cause: A function calls itself infinitely without a proper base case.
+   - Fix: Add or fix the base case. Consider using iteration instead.
+   - Best Practice: Use sys.setrecursionlimit() carefully, prefer iterative solutions for deep recursion.
+
+6. FileNotFoundError: No such file or directory
+   - Cause: The file path is incorrect or the file doesn't exist.
+   - Fix: Use os.path.exists() to check, or use pathlib.Path for cross-platform paths.
+   - Best Practice: Always use pathlib.Path and handle FileNotFoundError gracefully.
+
+7. ZeroDivisionError: division by zero
+   - Cause: Dividing a number by zero.
+   - Fix: Check the divisor before dividing.
+   - Best Practice: Validate inputs and use guard clauses.

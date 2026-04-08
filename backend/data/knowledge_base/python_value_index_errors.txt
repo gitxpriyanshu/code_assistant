@@ -1,0 +1,31 @@
+Common Python ValueError and IndexError Patterns
+
+1. ValueError: invalid literal for int() with base 10
+   - Cause: Passing a non-numeric string to int().
+   - Fix: Validate input before conversion or use try/except.
+   - Example Fix:
+     try:
+         number = int(user_input)
+     except ValueError:
+         print("Please enter a valid number")
+   - Best Practice: Always validate and sanitize user input.
+
+2. ValueError: too many values to unpack
+   - Cause: The number of variables on the left side doesn't match the number of values.
+   - Fix: Match the number of variables to the values, or use * to capture extras.
+   - Example Fix: first, *rest = my_list
+
+3. IndexError: list index out of range
+   - Cause: Accessing a list element with an index >= len(list) or < -len(list).
+   - Fix: Check the list length before accessing, or use try/except.
+   - Best Practice: Use len() checks, or iterate with for-in instead of indexing.
+
+4. KeyError: 'key_name'
+   - Cause: Accessing a dictionary key that doesn't exist.
+   - Fix: Use dict.get(key, default) or check with 'if key in dict'.
+   - Best Practice: Use defaultdict or dict.get() for safe access.
+
+5. AttributeError: 'NoneType' object has no attribute 'x'
+   - Cause: Calling a method or accessing a property on None.
+   - Fix: Add None checks before accessing attributes.
+   - Best Practice: Use Optional type hints and guard clauses.

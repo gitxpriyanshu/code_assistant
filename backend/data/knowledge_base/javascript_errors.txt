@@ -1,0 +1,38 @@
+Common JavaScript and TypeScript Error Patterns
+
+1. ReferenceError: x is not defined
+   - Cause: Using a variable before declaring it, or a typo in the variable name.
+   - Fix: Declare the variable with let/const before use.
+   - Best Practice: Always use 'const' by default, 'let' when reassignment is needed. Never use 'var'.
+
+2. TypeError: Cannot read properties of undefined (reading 'x')
+   - Cause: Accessing a property on an undefined or null value.
+   - Fix: Use optional chaining (?.) or nullish coalescing (??) operators.
+   - Example Fix: const value = obj?.nested?.property ?? 'default';
+   - Best Practice: Use TypeScript for static type checking.
+
+3. TypeError: x is not a function
+   - Cause: Calling something that is not a function, often due to incorrect imports or typos.
+   - Fix: Verify the import path, check the export type, and ensure correct spelling.
+   - Best Practice: Use named exports/imports for clarity.
+
+4. SyntaxError: Unexpected token
+   - Cause: Invalid JavaScript syntax such as missing brackets, commas, or using reserved words.
+   - Fix: Check for missing closing brackets, commas, or semicolons.
+   - Best Practice: Use a linter (ESLint) and formatter (Prettier) in your project.
+
+5. TypeError: Cannot assign to read only property
+   - Cause: Attempting to mutate a frozen or read-only object.
+   - Fix: Create a new object with the spread operator instead of mutating.
+   - Example Fix: const newObj = { ...oldObj, key: newValue };
+   - Best Practice: Embrace immutability patterns.
+
+6. Unhandled Promise Rejection
+   - Cause: A Promise rejected without a .catch() handler or try/catch in async/await.
+   - Fix: Always handle errors with .catch() or wrap await calls in try/catch.
+   - Best Practice: Use global error handlers and structured error logging.
+
+7. CORS Error: Access-Control-Allow-Origin
+   - Cause: Making HTTP requests to a different origin without proper CORS headers on the server.
+   - Fix: Configure CORS on the server to allow the client origin.
+   - Best Practice: Use a proxy in development, configure CORS properly in production.

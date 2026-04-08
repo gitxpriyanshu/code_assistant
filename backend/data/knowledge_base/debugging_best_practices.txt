@@ -1,0 +1,46 @@
+General Debugging Best Practices and Strategies
+
+1. Read the Error Message Carefully
+   - Error messages contain the error type, a description, and often a traceback with line numbers.
+   - Start from the bottom of the traceback for the actual error, then trace upward for the call stack.
+
+2. Reproduce the Error
+   - Create a minimal reproducible example (MRE).
+   - Isolate the failing code from the rest of the application.
+   - Remove unrelated code until you find the smallest code that still produces the error.
+
+3. Use Print Statements or Logging
+   - Add print() or logger.debug() calls to inspect variable values at key points.
+   - Use logging with different levels (DEBUG, INFO, WARNING, ERROR) for production code.
+
+4. Use a Debugger
+   - Python: Use pdb, ipdb, or your IDE's built-in debugger.
+   - JavaScript: Use browser DevTools or Node.js --inspect.
+   - Set breakpoints at the line before the error occurs.
+
+5. Check Variable Types
+   - Use type() in Python or typeof in JavaScript to verify variable types.
+   - Type mismatches are one of the most common sources of bugs.
+
+6. Check for Off-By-One Errors
+   - Common in loops and array indexing.
+   - Remember: arrays are 0-indexed in most languages.
+
+7. Rubber Duck Debugging
+   - Explain your code line by line to someone (or a rubber duck).
+   - The act of explaining often reveals the bug.
+
+8. Version Control
+   - Use git diff to see what changed since the code last worked.
+   - Use git bisect to find the exact commit that introduced the bug.
+
+9. Common Pitfalls
+   - Mutable default arguments in Python: def f(x=[]) — the list is shared across calls.
+   - JavaScript hoisting: var declarations are hoisted, let/const are not.
+   - Floating point arithmetic: 0.1 + 0.2 !== 0.3 in most languages.
+   - String vs number comparison: '10' > '9' is false in JavaScript (lexicographic).
+
+10. When to Ask for Help
+    - After you've spent a reasonable amount of time (e.g., 30 minutes).
+    - After you've created an MRE and documented what you've tried.
+    - Provide: code, error, what you expected, what you got, what you've tried.

@@ -1,0 +1,28 @@
+Common Python TypeError Patterns and Fixes
+
+1. TypeError: unsupported operand type(s) for +: 'int' and 'str'
+   - Cause: Attempting to concatenate or add an integer and a string.
+   - Fix: Convert the integer to a string using str() or convert the string to an integer using int().
+   - Example Fix: print(str(num) + text) or print(num + int(text))
+   - Best Practice: Use f-strings for string formatting: print(f"{num}{text}")
+
+2. TypeError: 'NoneType' object is not iterable
+   - Cause: Attempting to iterate over a variable that is None.
+   - Fix: Check if the variable is not None before iterating, or provide a default value.
+   - Example Fix: for item in (my_list or []):
+   - Best Practice: Use type hints and validate inputs.
+
+3. TypeError: 'int' object is not callable
+   - Cause: Using parentheses on an integer variable, often caused by variable name shadowing a built-in.
+   - Fix: Rename the variable to avoid shadowing built-in functions.
+   - Example: Don't use 'list = [1,2,3]', use 'my_list = [1,2,3]' instead.
+
+4. TypeError: missing required positional argument
+   - Cause: Calling a function without all required arguments.
+   - Fix: Pass all required arguments or add default parameter values.
+   - Best Practice: Use keyword arguments for clarity.
+
+5. TypeError: can only concatenate str (not "int") to str
+   - Cause: Trying to concatenate a string with a non-string type using +.
+   - Fix: Convert non-string types to strings or use f-strings.
+   - Best Practice: Always use f-strings or .format() for string interpolation.
