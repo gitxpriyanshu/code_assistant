@@ -61,9 +61,11 @@ export default function OutputPanel({ result, isLoading }) {
       {/* Fix Section */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4">Fixed Code</h3>
-        <div className="relative group bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-4 overflow-x-auto">
+        <div className="relative group bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg">
           <CopyButton text={result.fix} section="fix" />
-          <pre className="text-sm font-mono text-gray-900 dark:text-gray-200 whitespace-pre pr-8">{result.fix}</pre>
+          <div className="p-4 overflow-x-auto">
+            <pre className="text-sm font-mono text-gray-900 dark:text-gray-200 whitespace-pre pr-8">{result.fix}</pre>
+          </div>
         </div>
       </div>
 
@@ -71,9 +73,11 @@ export default function OutputPanel({ result, isLoading }) {
       {result.optimized_code && result.optimized_code !== result.fix && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4">Optimization</h3>
-          <div className="relative group bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-4 overflow-x-auto">
+          <div className="relative group bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg">
             <CopyButton text={result.optimized_code} section="opt" />
-            <pre className="text-sm font-mono text-gray-900 dark:text-gray-200 whitespace-pre pr-8">{result.optimized_code}</pre>
+            <div className="p-4 overflow-x-auto">
+              <pre className="text-sm font-mono text-gray-900 dark:text-gray-200 whitespace-pre pr-8">{result.optimized_code}</pre>
+            </div>
           </div>
         </div>
       )}
