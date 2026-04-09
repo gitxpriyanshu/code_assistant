@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain.schema import Document
 
 from app.config import settings
@@ -21,7 +21,7 @@ class VectorStoreService:
     """Wraps a FAISS vector store with convenience methods."""
 
     def __init__(self) -> None:
-        self._embeddings: HuggingFaceEmbeddings | None = None
+        self._embeddings: FastEmbedEmbeddings | None = None
         self._store: FAISS | None = None
 
     # ------------------------------------------------------------------
@@ -29,11 +29,9 @@ class VectorStoreService:
     # ------------------------------------------------------------------
     def initialize(self) -> None:
         """Load the embedding model and — if available — a persisted index."""
-        logger.info(f"Loading embedding model: {settings.embedding_model}")
-        self._embeddings = HuggingFaceEmbeddings(
-            model_name=settings.embedding_model,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
+        logger.info(f"Loading lightweight FastEmbed embedding model: {settings.embedding_model}")
+        self._embeddings = FastEmbedEmbeddings(
+            model_name="BAAI/bge-small-en-v1.5",
         )
 
         index_path = Path(settings.faiss_index_path)
