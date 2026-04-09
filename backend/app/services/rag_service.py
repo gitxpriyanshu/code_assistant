@@ -28,6 +28,7 @@ Rules:
 - The JSON must have exactly these keys: "explanation", "fix", "optimized_code".
 - Keep the explanation beginner-friendly but technically accurate.
 - Write production-quality code in the fix and optimized_code fields.
+- IMPORTANT: Use proper newlines (\\n) and indentation in code strings. NEVER return code on a single line.
 """
 
 USER_PROMPT_TEMPLATE = """### Language
