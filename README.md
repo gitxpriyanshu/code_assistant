@@ -1,22 +1,28 @@
-# 🤖 AI Debugging Assistant
+# 🤖 Code Debugging Assistant
 
-An AI-powered debugging assistant that takes **code + error** as input and returns:
-- **Explanation** — why the error occurs
-- **Fix** — corrected version of the code
-- **Optimization** — best-practice, optimized version
+A professional, AI-powered debugging SaaS that takes **code + error** as input and returns high-fidelity explanations and fixes.
 
-Powered by **RAG** (FAISS + sentence-transformers) and **Groq's Llama 3.3 70B** model.
+- **Explanation** — Detailed analysis of *why* the error occurs.
+- **Fix** — A robust, corrected version of the code.
+- **Optimization** — Best-practice, optimized version for production.
+
+Powered by **RAG** (FAISS + FastEmbed) and **Groq's Llama 3.3 70B** model.
 
 ## 🏗 Tech Stack
 
 | Layer         | Technology                          |
 |---------------|--------------------------------------|
-| Backend       | FastAPI (Python)                    |
-| Frontend      | React + Vite                        |
+| Backend       | FastAPI (Python 3.12)               |
+| Frontend      | React + Vite (Vanilla CSS)          |
 | Vector DB     | FAISS                               |
-| Embeddings    | all-MiniLM-L6-v2 (sentence-transformers) |
+| Embeddings    | BAAI/bge-small-en-v1.5 (**FastEmbed**) |
 | LLM           | Groq — llama-3.3-70b-versatile      |
-| RAG Framework | LangChain                           |
+| Deployment    | Render (Backend) + Vercel (Frontend) |
+
+## 🚀 Deployment
+
+- **Backend (Render)**: [Live API](https://code-assistant-backend.onrender.com/api/health)
+- **Frontend (Vercel)**: Live Production Build
 
 ## 📁 Project Structure
 
@@ -29,23 +35,22 @@ Code-assistant/
 │   │   ├── routers/debug.py     # API endpoints
 │   │   ├── services/
 │   │   │   ├── rag_service.py   # RAG pipeline
-│   │   │   ├── vector_store.py  # FAISS management
+│   │   │   ├── vector_store.py  # FAISS management (FastEmbed)
 │   │   │   └── llm_service.py   # Groq LLM wrapper
 │   │   ├── models/schemas.py    # Pydantic models
 │   │   └── knowledge/seed_data.py
-│   ├── data/knowledge_base/     # Debugging knowledge docs
 │   ├── requirements.txt
 │   └── .env
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx
-│   │   ├── components/          # React components
-│   │   └── services/api.js      # API layer
+│   │   ├── components/          # Professional UI components
+│   │   └── services/api.js      # API layer (Environment-aware)
 │   └── package.json
 └── README.md
 ```
 
-## 🚀 Getting Started
+## 🚀 Local Development
 
 ### Prerequisites
 - Python 3.10+
@@ -64,10 +69,6 @@ source venv/bin/activate  # macOS/Linux
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure environment
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
-
 # Start the server
 uvicorn app.main:app --reload --port 8000
 ```
@@ -84,9 +85,7 @@ npm install
 npm run dev
 ```
 
-### 3. Open the App
-
-Visit **http://localhost:5173** — paste your code and error, then click **Debug My Code**!
+Visit **http://localhost:5173** to test locally!
 
 ## 📡 API Endpoints
 
@@ -94,27 +93,6 @@ Visit **http://localhost:5173** — paste your code and error, then click **Debu
 |--------|----------------|------------------------------------|
 | GET    | `/api/health`  | Health check                       |
 | POST   | `/api/debug`   | Submit code + error for debugging  |
-
-### POST `/api/debug` — Request Body
-
-```json
-{
-  "code": "def add(a, b):\n    return a + b\n\nprint(add(1, '2'))",
-  "error_message": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
-  "language": "python"
-}
-```
-
-### Response
-
-```json
-{
-  "explanation": "The error occurs because...",
-  "fix": "def add(a, b):\n    return int(a) + int(b)...",
-  "optimized_code": "def add(a: int, b: int) -> int:...",
-  "relevant_context": ["..."]
-}
-```
 
 ## 📝 License
 
