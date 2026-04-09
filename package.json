@@ -1,0 +1,14 @@
+{
+  "name": "code-assistant-manager",
+  "version": "1.0.0",
+  "description": "Root workspace manager to start both Python backend and React frontend simultaneously.",
+  "scripts": {
+    "preinstall": "cd frontend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && source venv/bin/activate && uvicorn app.main:app --reload --port 8000",
+    "dev": "concurrently -c \"cyan.bold,magenta.bold\" -n \"REACT,FASTAPI\" \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
