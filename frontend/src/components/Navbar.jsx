@@ -15,7 +15,7 @@ export default function Navbar({ isDark, toggleTheme }) {
             </svg>
           </div>
           <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-200">
-            AI Debug Assistant
+            Code Debugging Assistant
           </h1>
         </div>
 

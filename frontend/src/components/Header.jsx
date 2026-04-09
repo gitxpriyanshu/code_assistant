@@ -33,7 +33,7 @@ export default function Header() {
             </svg>
           </div>
           <div>
-            <h1 className="header__title">AI Debug Assistant</h1>
+            <h1 className="header__title">Code Debugging Assistant</h1>
             <p className="header__subtitle">
               Powered by RAG + Groq Llama 3.3
             </p>

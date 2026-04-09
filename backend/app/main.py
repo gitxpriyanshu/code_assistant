@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
 # FastAPI app
 # ---------------------------------------------------------------------------
 app = FastAPI(
-    title="AI Debugging Assistant",
+    title="Code Debugging Assistant",
     description="Submit code + error → get explanation, fix & optimization powered by RAG + Groq LLM.",
     version="1.0.0",
     lifespan=lifespan,
