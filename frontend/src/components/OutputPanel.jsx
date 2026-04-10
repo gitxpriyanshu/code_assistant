@@ -15,7 +15,7 @@ export default function OutputPanel({ result, isLoading }) {
     return (
       <button
         onClick={() => handleCopy(text, section)}
-        className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md transition-colors"
+        className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md transition-colors"
         title="Copy code"
       >
         {isCopied ? <Check size={14} className="text-green-600 dark:text-green-400" /> : <Copy size={14} />}
@@ -42,6 +42,22 @@ export default function OutputPanel({ result, isLoading }) {
     );
   }
 
+  if (result.isExplain) {
+    return (
+      <div className="flex flex-col gap-6 h-full">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 h-full overflow-y-auto">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4">Line-by-Line Explanation</h3>
+          <div className="relative bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
+            <CopyButton text={result.explanation} section="explain" />
+            <pre className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-mono pr-8">
+              {result.explanation}
+            </pre>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
 
@@ -49,9 +65,15 @@ export default function OutputPanel({ result, isLoading }) {
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">Explanation</h3>
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-            High Confidence
-          </span>
+          {result.confidence && (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
+              result.confidence > 0.85 ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' :
+              result.confidence > 0.7 ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800' :
+              'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
+            }`}>
+              Confidence: {(result.confidence * 100).toFixed(0)}%
+            </span>
+          )}
         </div>
         <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
           {result.explanation}

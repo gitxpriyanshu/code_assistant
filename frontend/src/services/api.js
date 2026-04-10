@@ -34,4 +34,9 @@ export async function healthCheck() {
   return response.data;
 }
 
+export const explainCode = async (data) => {
+  const response = await apiClient.post("/explain", data);
+  return response.data;
+};
+
 export default apiClient;

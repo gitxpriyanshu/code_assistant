@@ -50,6 +50,27 @@ export default function App() {
     }
   };
 
+  const handleExplain = async (payload) => {
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const { explainCode } = await import('./services/api');
+      const data = await explainCode(payload);
+      setResult({ isExplain: true, explanation: data.explanation });
+    } catch (err) {
+      console.error('Explain API failed:', err);
+      setError(
+        err.response?.data?.detail || 
+        err.message || 
+        'An error occurred connecting to the backend.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200 font-sans text-gray-900 dark:text-gray-200 flex flex-col">
       <Navbar isDark={isDark} toggleTheme={toggleTheme} />
@@ -64,7 +85,7 @@ export default function App() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start flex-1">
-          <InputPanel onSubmit={handleSubmit} isLoading={isLoading} />
+          <InputPanel onSubmit={handleSubmit} onExplain={handleExplain} isLoading={isLoading} />
           <OutputPanel result={result} isLoading={isLoading} />
         </div>
       </main>

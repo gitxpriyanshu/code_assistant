@@ -50,3 +50,25 @@ async def debug_code(request: DebugRequest, req: Request):
             status_code=500,
             detail=f"Failed to process debugging request: {str(e)}",
         )
+
+# ---------------------------------------------------------------------------
+# Explain endpoint
+# ---------------------------------------------------------------------------
+@router.post("/explain")
+async def explain_code(req: DebugRequest, request: Request):
+    """
+    Accept code and return a line-by-line explanation.
+    """
+    try:
+        vector_store = request.app.state.vector_store
+        rag_service = RAGService(vector_store=vector_store)
+        result = await rag_service.explain_code(req.code, req.language)
+        
+        return {"explanation": result}
+
+    except Exception as e:
+        logger.error(f"Error processing explain request: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process explain request: {str(e)}",
+        )

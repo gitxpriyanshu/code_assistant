@@ -18,8 +18,7 @@ class DebugRequest(BaseModel):
         json_schema_extra={"example": "def add(a, b):\n    return a + b\n\nprint(add(1, '2'))"},
     )
     error_message: str = Field(
-        ...,
-        min_length=1,
+        default="",
         description="The error or traceback the user encountered",
         json_schema_extra={"example": "TypeError: unsupported operand type(s) for +: 'int' and 'str'"},
     )
@@ -34,24 +33,11 @@ class DebugRequest(BaseModel):
 # Response
 # ---------------------------------------------------------------------------
 class DebugResponse(BaseModel):
-    """Structured debugging result returned to the frontend."""
-
-    explanation: str = Field(
-        ...,
-        description="Plain-English explanation of why the error occurs",
-    )
-    fix: str = Field(
-        ...,
-        description="Corrected version of the code",
-    )
-    optimized_code: str = Field(
-        ...,
-        description="Optimized / best-practice version of the code",
-    )
-    relevant_context: list[str] = Field(
-        default_factory=list,
-        description="Relevant knowledge-base snippets used for context",
-    )
+    explanation: str
+    fix: str
+    optimized_code: str
+    sources: list[str]
+    confidence: float
 
 
 # ---------------------------------------------------------------------------

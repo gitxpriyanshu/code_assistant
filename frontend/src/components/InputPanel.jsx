@@ -5,19 +5,19 @@ const LANGUAGES = [
   'python', 'javascript', 'typescript', 'java', 'c++', 'go', 'rust'
 ];
 
-export default function InputPanel({ onSubmit, isLoading }) {
+export default function InputPanel({ onSubmit, onExplain, isLoading }) {
   const [code, setCode] = React.useState('');
   const [errorText, setErrorText] = React.useState('');
   const [language, setLanguage] = React.useState('python');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (code.trim() && errorText.trim() && !isLoading) {
+    if (code.trim() && !isLoading) {
       onSubmit({ code, error_message: errorText, language });
     }
   };
 
-  const isReady = code.trim() && errorText.trim();
+  const isReady = code.trim() !== '';
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 transition-colors duration-200">
@@ -64,21 +64,40 @@ export default function InputPanel({ onSubmit, isLoading }) {
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={!isReady || isLoading}
-          className={`flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200
-            ${!isReady || isLoading ? 'opacity-50 cursor-not-allowed hover:bg-blue-600' : ''}`}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            'Debug Code'
-          )}
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            disabled={!isReady || isLoading}
+            className={`flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200
+              ${!isReady || isLoading ? 'opacity-50 cursor-not-allowed hover:bg-blue-600' : ''}`}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              'Debug Code'
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!code) {
+                alert("Enter code");
+                return;
+              }
+              if (onExplain) onExplain({ code, language });
+            }}
+            disabled={!code.trim() || isLoading}
+            className={`flex items-center justify-center gap-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition duration-200
+              ${!code.trim() || isLoading ? 'opacity-50 cursor-not-allowed hover:bg-gray-600' : ''}`}
+          >
+            Explain Code
+          </button>
+        </div>
 
       </form>
     </div>
