@@ -36,8 +36,17 @@ class DebugResponse(BaseModel):
     explanation: str
     fix: str
     optimized_code: str
+    why_fix_works: str
     sources: list[str]
     confidence: float
+    warning: str | None = None
+    error_type: str | None = None
+
+
+class ExplainResponse(BaseModel):
+    explanation: str
+    confidence: float
+    warning: str | None = None
 
 
 # ---------------------------------------------------------------------------

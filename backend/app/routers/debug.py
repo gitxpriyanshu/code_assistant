@@ -7,7 +7,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
-from app.models.schemas import DebugRequest, DebugResponse, HealthResponse
+from app.models.schemas import DebugRequest, DebugResponse, ExplainResponse, HealthResponse
 from app.services.rag_service import RAGService
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ async def debug_code(request: DebugRequest, req: Request):
 # ---------------------------------------------------------------------------
 # Explain endpoint
 # ---------------------------------------------------------------------------
-@router.post("/explain")
+@router.post("/explain", response_model=ExplainResponse)
 async def explain_code(req: DebugRequest, request: Request):
     """
     Accept code and return a line-by-line explanation.
@@ -63,12 +63,12 @@ async def explain_code(req: DebugRequest, request: Request):
         vector_store = request.app.state.vector_store
         rag_service = RAGService(vector_store=vector_store)
         result = await rag_service.explain_code(req.code, req.language)
-        
-        return {"explanation": result}
+        return result
 
     except Exception as e:
         logger.error(f"Error processing explain request: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to process explain request: {str(e)}",
+        return ExplainResponse(
+            explanation="API limit reached. Please try again later.",
+            confidence=0,
+            warning="Rate limit exceeded",
         )

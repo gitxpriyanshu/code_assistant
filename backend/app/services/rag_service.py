@@ -118,14 +118,15 @@ Output format (STRICT JSON):
 {{
 "explanation": "...",
 "fix": "...",
-"optimized_code": "..."
+"optimized_code": "...",
+"why_fix_works": "..."
 }}
 
 ---
 
 Rules:
 
-* Always return all 3 fields
+* Always return all 4 fields
 * "fix" must contain ONLY valid runnable code
 * Do NOT include explanations inside "fix"
 * If no fix is needed, return original code
@@ -136,11 +137,26 @@ Rules:
 * Use correct indentation
 * Do NOT compress multiple statements into one line
 * Follow standard coding style
+* "why_fix_works" must explain WHY the fix solves the problem
+* Keep "why_fix_works" short (2-4 bullet points or lines)
+* Do NOT repeat explanation in "why_fix_works"
 """
 
         # 4. Call the LLM
         logger.info("Sending prompt to Groq LLM …")
-        raw_response = await self._llm_service.agenerate(full_prompt)
+        try:
+            raw_response = await self._llm_service.agenerate(full_prompt)
+        except Exception as e:
+            logger.error(f"Failed to generate LLM response: {e}")
+            return DebugResponse(
+                explanation="API limit reached. Please try again later.",
+                fix="",
+                optimized_code="",
+                why_fix_works="",
+                sources=[],
+                confidence=0,
+                warning="Rate limit exceeded"
+            )
 
         # 5. Parse structured output
         parsed = self._parse_response(raw_response)
@@ -165,12 +181,48 @@ Rules:
         if not optimized:
             optimized = code  # fallback to original code
 
+        # Language Heuristic
+        detected_lang = None
+        if "function" in code.lower() or "console.log" in code.lower() or "=>" in code.lower():
+            detected_lang = "JavaScript/TypeScript"
+        elif "def " in code.lower() or "print(" in code.lower() or ":" in code.lower():
+            detected_lang = "Python"
+            
+        warning = None
+        if detected_lang:
+            req_lang = request.language.lower()
+            if detected_lang == "JavaScript/TypeScript" and "script" not in req_lang and req_lang not in ["js", "ts"]:
+                warning = f"Selected language may not match code. Detected: {detected_lang}"
+            elif detected_lang == "Python" and "python" not in req_lang and "py" not in req_lang:
+                warning = f"Selected language may not match code. Detected: {detected_lang}"
+
+        # Error Type Detection
+        error_type = None
+        error_text = error or ""
+        if "SyntaxError" in error_text:
+            error_type = "Syntax Error"
+        elif "IndexError" in error_text:
+            error_type = "Runtime Error (IndexError)"
+        elif "TypeError" in error_text:
+            error_type = "Runtime Error (TypeError)"
+        elif "ValueError" in error_text:
+            error_type = "Runtime Error (ValueError)"
+        elif "NameError" in error_text:
+            error_type = "Runtime Error (NameError)"
+        elif "AttributeError" in error_text:
+            error_type = "Runtime Error (AttributeError)"
+        elif not error_text.strip():
+            error_type = "Logical Error"
+
         return DebugResponse(
             explanation=parsed.get("explanation", "No explanation generated."),
             fix=fix,
             optimized_code=optimized,
+            why_fix_works=parsed.get("why_fix_works", ""),
             sources=context_snippets,
             confidence=confidence,
+            warning=warning,
+            error_type=error_type,
         )
 
     async def explain_code(self, code: str, language: str):
@@ -190,8 +242,16 @@ Rules:
 * Keep explanations simple and short
 * Do not combine multiple lines
 """
-        response = await self._llm_service.agenerate(prompt)
-        return response
+        try:
+            response = await self._llm_service.agenerate(prompt)
+            return {"explanation": response, "confidence": 0.9, "warning": None}
+        except Exception as e:
+            logger.error(f"Explain API failed: {e}")
+            return {
+                "explanation": "API limit reached. Please try again later.",
+                "confidence": 0,
+                "warning": "Rate limit exceeded",
+            }
 
     # ------------------------------------------------------------------
     # Helpers

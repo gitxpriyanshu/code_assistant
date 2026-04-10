@@ -1,14 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const LANGUAGES = [
   'python', 'javascript', 'typescript', 'java', 'c++', 'go', 'rust'
 ];
 
-export default function InputPanel({ onSubmit, onExplain, isLoading }) {
+export default function InputPanel({ onSubmit, onExplain, isLoading, prefill, onPrefillConsumed }) {
   const [code, setCode] = React.useState('');
   const [errorText, setErrorText] = React.useState('');
   const [language, setLanguage] = React.useState('python');
+
+  // Restore fields when a history item is selected
+  useEffect(() => {
+    if (prefill) {
+      setCode(prefill.code || '');
+      setErrorText(prefill.error_message || '');
+      setLanguage(prefill.language || 'python');
+      if (onPrefillConsumed) onPrefillConsumed();
+    }
+  }, [prefill]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
