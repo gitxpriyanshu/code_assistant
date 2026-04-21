@@ -1,3 +1,5 @@
+"""
+Groq LLM service.
 Provides a configured ChatGroq instance for use in the RAG pipeline.
 """
 
