@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import './CodeInput.css';
 
 const LANGUAGES = [
   'python',
@@ -76,7 +75,7 @@ export default function CodeInput({ onSubmit, isLoading }) {
           disabled={!code && !errorMessage}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
           </svg>
           Clear
         </button>
@@ -86,7 +85,7 @@ export default function CodeInput({ onSubmit, isLoading }) {
       <div className="code-input__field">
         <label htmlFor="code-textarea" className="code-input__label">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+            <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
           </svg>
           Your Code
         </label>
@@ -110,7 +109,7 @@ export default function CodeInput({ onSubmit, isLoading }) {
       <div className="code-input__field">
         <label htmlFor="error-textarea" className="code-input__label code-input__label--error">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           Error / Traceback
         </label>
@@ -140,7 +139,7 @@ export default function CodeInput({ onSubmit, isLoading }) {
         ) : (
           <>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 20V4M5 11l7-7 7 7"/>
+              <path d="M12 20V4M5 11l7-7 7 7" />
             </svg>
             Debug My Code
           </>

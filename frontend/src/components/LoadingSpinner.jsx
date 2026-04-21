@@ -1,4 +1,4 @@
-import './LoadingSpinner.css';
+
 
 export default function LoadingSpinner({ message = 'Analyzing your code…' }) {
   return (
