@@ -1,8 +1,7 @@
-"""
-Groq LLM service.
 Provides a configured ChatGroq instance for use in the RAG pipeline.
 """
 
+import os
 import logging
 
 from langchain_groq import ChatGroq
@@ -23,11 +22,19 @@ class LLMService:
     # ------------------------------------------------------------------
     def initialize(self) -> ChatGroq:
         """Create and return a ChatGroq instance."""
-        if not settings.groq_api_key:
+        # Force a direct OS check to bypass any Pydantic caching issues
+        api_key = settings.groq_api_key or os.getenv("GROQ_API_KEY")
+        
+        if not api_key:
+            logger.error("CONFIG CRITICAL: GROQ_API_KEY is not found in settings or os.environ")
             raise RuntimeError("GROQ_API_KEY is not configured")
+            
+        # Safe log for verification in Render console
+        logger.info(f"CONFIG CHECK: Groq API Key found (Prefix: {api_key[:4]}...)")
         logger.info(f"Initialising Groq LLM: {settings.model_name}")
+        
         self._llm = ChatGroq(
-            groq_api_key=settings.groq_api_key,
+            groq_api_key=api_key,
             model_name=settings.model_name,
             temperature=0.3,
             max_tokens=4096,
