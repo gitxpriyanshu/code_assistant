@@ -2,7 +2,7 @@
 
 > **A state-of-the-art, RAG-powered AI system that detects, explains, and fixes code errors in seconds with high confidence.**
 
-**[🌐 Live Demo (Frontend)](https://code-assistant-gold.vercel.app/)** | **[📡 API Health Status](https://code-assistant-gold.vercel.app/api/health)**
+**[🌐 Live Demo (Frontend)](https://code-assistant-gold.vercel.app/)** | **[📡 API Health Status](https://code-assistant-backend.onrender.com/api/health)**
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -103,7 +103,8 @@ Run both Backend and Frontend simultaneously with a single command:
 npm run dev
 ```
 *   **Frontend**: http://localhost:5173
-*   **Backend API**: http://localhost:8000 (Swagger docs at /docs)
+*   **Backend API (Local)**: http://localhost:8000/api
+*   **Backend API (Production)**: https://code-assistant-backend.onrender.com/api
 
 ---
 
