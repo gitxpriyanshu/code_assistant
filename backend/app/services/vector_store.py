@@ -23,41 +23,51 @@ class VectorStoreService:
     def __init__(self) -> None:
         self._embeddings: FastEmbedEmbeddings | None = None
         self._store: FAISS | None = None
+        self._is_initializing = False
 
-    # ------------------------------------------------------------------
-    # Lifecycle
-    # ------------------------------------------------------------------
+    def _ensure_initialized(self) -> None:
+        """Internal helper to load resources only when needed."""
+        if self._store is not None and self._embeddings is not None:
+            return
+            
+        if self._is_initializing:
+            return # Prevent re-entry
+
+        self._is_initializing = True
+        try:
+            os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+            
+            if self._embeddings is None:
+                logger.info(f"Lazy-loading embedding model: {settings.embedding_model}")
+                self._embeddings = FastEmbedEmbeddings(
+                    model_name="BAAI/bge-small-en-v1.5",
+                )
+
+            if self._store is None:
+                index_path = Path(settings.faiss_index_path)
+                if index_path.exists() and (index_path / "index.faiss").exists():
+                    if settings.allow_unsafe_faiss_load:
+                        logger.info(f"Lazy-loading FAISS index from {index_path}")
+                        self._store = FAISS.load_local(
+                            str(index_path),
+                            self._embeddings,
+                            allow_dangerous_deserialization=True,
+                        )
+                else:
+                    logger.info("Initializing new empty FAISS index")
+        finally:
+            self._is_initializing = False
+
     def initialize(self) -> None:
-        """Load the embedding model and — if available — a persisted index."""
-        os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
-        logger.info(f"Loading lightweight FastEmbed embedding model: {settings.embedding_model}")
-        self._embeddings = FastEmbedEmbeddings(
-            model_name="BAAI/bge-small-en-v1.5",
-        )
+        """No-op for backward compatibility - initialization is now lazy."""
+        logger.info("VectorStoreService ready (initialized on-demand)")
 
-        index_path = Path(settings.faiss_index_path)
-        if index_path.exists() and (index_path / "index.faiss").exists():
-            if settings.allow_unsafe_faiss_load:
-                logger.info(f"Loading existing FAISS index from {index_path}")
-                self._store = FAISS.load_local(
-                    str(index_path),
-                    self._embeddings,
-                    allow_dangerous_deserialization=True,
-                )
-            else:
-                logger.warning(
-                    "Skipping persisted FAISS load because ALLOW_UNSAFE_FAISS_LOAD is disabled."
-                )
-        else:
-            logger.info("No existing index found — will create on first ingestion")
-
-    # ------------------------------------------------------------------
-    # Ingestion
-    # ------------------------------------------------------------------
     def add_documents(self, documents: list[Document]) -> None:
         """Add LangChain `Document` objects to the FAISS index and persist."""
         if not documents:
             return
+
+        self._ensure_initialized()
 
         if self._store is None:
             self._store = FAISS.from_documents(documents, self._embeddings)
@@ -67,20 +77,16 @@ class VectorStoreService:
         self._persist()
         logger.info(f"Added {len(documents)} documents to FAISS index")
 
-    # ------------------------------------------------------------------
-    # Retrieval
-    # ------------------------------------------------------------------
     def similarity_search(self, query: str, k: int = 4) -> list[Document]:
         """Return the top-k most relevant documents for a query."""
+        self._ensure_initialized()
+        
         if self._store is None:
             logger.warning("Vector store is empty — returning no results")
             return []
 
         return self._store.similarity_search(query, k=k)
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
     @property
     def is_empty(self) -> bool:
         return self._store is None
@@ -93,6 +99,8 @@ class VectorStoreService:
 
     def _persist(self) -> None:
         """Save the FAISS index to disk."""
+        if self._store is None:
+            return
         index_path = Path(settings.faiss_index_path)
         index_path.mkdir(parents=True, exist_ok=True)
         self._store.save_local(str(index_path))

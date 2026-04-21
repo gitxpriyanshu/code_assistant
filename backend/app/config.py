@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         validation_alias="GROQ_API_KEY",
     )
     model_name: str = Field(
-        default="llama3-8b-8192",
+        default="llama-3.1-8b-instant",
         alias="MODEL_NAME",
     )
     embedding_model: str = Field(

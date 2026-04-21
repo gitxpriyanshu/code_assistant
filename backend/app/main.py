@@ -33,22 +33,26 @@ vector_store_service = VectorStoreService()
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialise the FAISS vector store and seed knowledge on startup."""
-    logger.info("🚀 Starting AI Debugging Assistant backend …")
-
-    # 1. Initialise FAISS
-    vector_store_service.initialize()
-    logger.info("✅ FAISS vector store ready")
-
-    # 2. Seed knowledge base if the store is empty
-    seed_knowledge_base(vector_store_service)
-    logger.info("✅ Knowledge base seeded")
-
-    # Expose the service on app.state so routers can access it
+    """Start up instantly and initialize heavy AI components asynchronously."""
+    logger.info("🚀 Web server is online. Initializing AI components in background...")
+    
+    # Expose the service on app.state
     app.state.vector_store = vector_store_service
+    
+    # Run heavy initialization in a BACKGROUND task so it doesn't block the port
+    import asyncio
+    
+    async def bg_init():
+        try:
+            # Run the synchronous seeding in a separate thread so the server stays responsive
+            await asyncio.to_thread(seed_knowledge_base, vector_store_service)
+            logger.info("✅ AI Background Initialization Complete")
+        except Exception as e:
+            logger.error(f"❌ Background init failed: {e}")
 
-    yield  # ← app is running
+    asyncio.create_task(bg_init())
 
+    yield
     logger.info("👋 Shutting down …")
 
 
