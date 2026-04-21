@@ -12,7 +12,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 60000, // 60s — LLM calls can be slow
+  timeout: 120000, // 120s — LLM calls can be slow and Render free tier needs time
 });
 
 /**

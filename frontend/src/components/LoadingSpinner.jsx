@@ -1,6 +1,13 @@
+import { useState, useEffect } from 'react';
 
+export default function LoadingSpinner() {
+  const [showSlowMessage, setShowSlowMessage] = useState(false);
 
-export default function LoadingSpinner({ message = 'Analyzing your code…' }) {
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSlowMessage(true), 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="spinner-container" id="loading-spinner">
       <div className="spinner">
