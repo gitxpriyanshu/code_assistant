@@ -17,12 +17,42 @@ const apiClient = axios.create({
 
 /**
  * Submit code + error for debugging.
- * @param {{ code: string, error_message: string, language: string }} payload
- * @returns {Promise<{ explanation: string, fix: string, optimized_code: string, relevant_context: string[] }>}
  */
 export async function debugCode(payload) {
   const response = await apiClient.post('/debug', payload);
-  return response.data;
+  let result = response.data;
+
+  // Global Safety Parse: Catch cases where backend returns stringified JSON fields
+  const safetyParse = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    
+    // If explanation is a JSON string, extract its fields
+    const rawExp = obj.explanation;
+    if (typeof rawExp === 'string' && (rawExp.trim().startsWith('{') || rawExp.includes('{'))) {
+      try {
+        // Attempt 1: Direct Parse
+        let parsed;
+        try {
+          parsed = JSON.parse(rawExp);
+        } catch {
+          // Attempt 2: Boundary Extraction ({...})
+          const match = rawExp.match(/(\{[\s\S]*\})/);
+          if (match) parsed = JSON.parse(match[1]);
+        }
+
+        if (parsed) {
+          if (parsed.explanation) obj.explanation = parsed.explanation;
+          if (parsed.fix) obj.fix = parsed.fix;
+          if (parsed.error_type) obj.error_type = parsed.error_type;
+          if (parsed.confidence) obj.confidence = parsed.confidence;
+          if (parsed.optimized_code) obj.optimized_code = parsed.optimized_code;
+        }
+      } catch { /* ignore final parse error */ }
+    }
+    return obj;
+  };
+
+  return safetyParse(result);
 }
 
 /**

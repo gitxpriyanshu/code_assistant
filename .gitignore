@@ -5,7 +5,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
-data/faiss_index/
+backend/data/faiss_index/
 
 # Node / Frontend
 node_modules/

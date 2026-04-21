@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import InputPanel from './components/InputPanel';
 import OutputPanel from './components/OutputPanel';
-import HistoryPanel, { getHistory, saveToHistory } from './components/HistoryPanel';
-import { debugCode } from './services/api';
+import HistoryPanel from './components/HistoryPanel';
+import Background from './components/Background';
+import { debugCode, explainCode } from './services/api';
+import { getHistory, saveToHistory } from './utils/history';
 
 export default function App() {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [history, setHistory] = useState(() => getHistory());
-  const [prefill, setPrefill] = useState(null);
+  const [inputSeed, setInputSeed] = useState(null);
+  const [inputKey, setInputKey] = useState(0);
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -67,13 +70,13 @@ export default function App() {
     setResult(null);
 
     try {
-      const { explainCode } = await import('./services/api');
       const data = await explainCode(payload);
       setResult({
         isExplain: true,
         explanation: data.explanation,
         confidence: data.confidence,
         warning: data.warning || null,
+        error_type: data.error_type || 'Explain Mode',
       });
     } catch (err) {
       console.error('Explain API failed:', err);
@@ -88,18 +91,15 @@ export default function App() {
   };
 
   const handleHistorySelect = (item) => {
-    setPrefill(item);
+    setInputSeed(item);
+    setInputKey((k) => k + 1);
     setResult({ explanation: item.explanation, isHistoryPreview: true });
     setError(null);
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Background layer — stays fixed behind all UI */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 z-0 pointer-events-none bg-gray-50 dark:bg-gray-950 transition-colors duration-200"
-      />
+    <div className="relative min-h-screen overflow-hidden bg-white dark:bg-gray-950">
+      <Background />
 
       {/* Main UI layer */}
       <div className="relative z-10 min-h-screen flex flex-col font-sans text-gray-900 dark:text-gray-200 transition-colors duration-200">
@@ -117,11 +117,11 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start flex-1">
             <div className="flex flex-col gap-4">
               <InputPanel
+                key={inputKey}
                 onSubmit={handleSubmit}
                 onExplain={handleExplain}
                 isLoading={isLoading}
-                prefill={prefill}
-                onPrefillConsumed={() => setPrefill(null)}
+                initialValues={inputSeed}
               />
               <HistoryPanel history={history} onSelect={handleHistorySelect} />
             </div>

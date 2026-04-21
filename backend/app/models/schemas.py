@@ -32,21 +32,27 @@ class DebugRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Response
 # ---------------------------------------------------------------------------
-class DebugResponse(BaseModel):
+class BaseAIResponse(BaseModel):
+    """Shared fields across all AI-generated responses."""
     explanation: str
+    confidence: float
+    warning: str | None = None
+
+
+class DebugResponse(BaseAIResponse):
+    """Full debug pipeline response including fix, optimized code, and sources."""
+    line_by_line: str = ""
     fix: str
     optimized_code: str
-    why_fix_works: str
-    sources: list[str]
-    confidence: float
-    warning: str | None = None
+    why_fix_works: str = ""
+    sources: list[str] = []
     error_type: str | None = None
+    confidence_reason: str | None = None
 
 
-class ExplainResponse(BaseModel):
-    explanation: str
-    confidence: float
-    warning: str | None = None
+class ExplainResponse(BaseAIResponse):
+    """Line-by-line code explanation response."""
+    error_type: str | None = None
 
 
 # ---------------------------------------------------------------------------

@@ -29,6 +29,7 @@ class VectorStoreService:
     # ------------------------------------------------------------------
     def initialize(self) -> None:
         """Load the embedding model and — if available — a persisted index."""
+        os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
         logger.info(f"Loading lightweight FastEmbed embedding model: {settings.embedding_model}")
         self._embeddings = FastEmbedEmbeddings(
             model_name="BAAI/bge-small-en-v1.5",
@@ -36,12 +37,17 @@ class VectorStoreService:
 
         index_path = Path(settings.faiss_index_path)
         if index_path.exists() and (index_path / "index.faiss").exists():
-            logger.info(f"Loading existing FAISS index from {index_path}")
-            self._store = FAISS.load_local(
-                str(index_path),
-                self._embeddings,
-                allow_dangerous_deserialization=True,
-            )
+            if settings.allow_unsafe_faiss_load:
+                logger.info(f"Loading existing FAISS index from {index_path}")
+                self._store = FAISS.load_local(
+                    str(index_path),
+                    self._embeddings,
+                    allow_dangerous_deserialization=True,
+                )
+            else:
+                logger.warning(
+                    "Skipping persisted FAISS load because ALLOW_UNSAFE_FAISS_LOAD is disabled."
+                )
         else:
             logger.info("No existing index found — will create on first ingestion")
 

@@ -10,9 +10,12 @@ from pydantic import Field
 class Settings(BaseSettings):
     """Central configuration loaded from environment variables."""
 
-    groq_api_key: str = Field(..., description="Groq API key for LLM access")
+    groq_api_key: str = Field(
+        default="",
+        description="Groq API key for LLM access",
+    )
     model_name: str = Field(
-        default="llama-3.3-70b-versatile",
+        default="llama3-8b-8192",
         description="Groq model identifier",
     )
     embedding_model: str = Field(
@@ -22,6 +25,10 @@ class Settings(BaseSettings):
     faiss_index_path: str = Field(
         default="./data/faiss_index",
         description="Path to persist the FAISS index",
+    )
+    allow_unsafe_faiss_load: bool = Field(
+        default=False,
+        description="Allow loading FAISS index pickle files from disk",
     )
 
     class Config:
