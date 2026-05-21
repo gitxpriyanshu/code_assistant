@@ -1,51 +1,10 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
+import { detectLikelyLanguage } from '../utils/detectLanguage';
 
 const LANGUAGES = [
   'python', 'javascript', 'typescript', 'java', 'c++', 'go', 'rust'
 ];
-
-function detectLikelyLanguage(code) {
-  const src = (code || '').trim();
-  if (!src) return null;
-
-  // Rust
-  if (/\bfn\s+main\s*\(/.test(src) || /println!\s*\(/.test(src) || /\blet\s+mut\s+/.test(src)) {
-    return 'rust';
-  }
-
-  // Go
-  if (/\bpackage\s+main\b/.test(src) || /\bfmt\.Println\s*\(/.test(src) || /:=/.test(src)) {
-    return 'go';
-  }
-
-  // C++
-  if (/#include\s*<.*>/.test(src) || /\bstd::/.test(src) || /\bcout\s*<</.test(src)) {
-    return 'c++';
-  }
-
-  // Java
-  if (/\bpublic\s+class\b/.test(src) || /\bpublic\s+static\s+void\s+main\b/.test(src) || /\bSystem\.out\.println\s*\(/.test(src)) {
-    return 'java';
-  }
-
-  // TypeScript (before JavaScript)
-  if (/\binterface\s+\w+/.test(src) || /\btype\s+\w+\s*=/.test(src) || /:\s*(string|number|boolean|any|unknown|never|void)\b/.test(src)) {
-    return 'typescript';
-  }
-
-  // JavaScript
-  if (/\b(const|let|var)\s+\w+/.test(src) || /\bconsole\.log\s*\(/.test(src) || /=>/.test(src)) {
-    return 'javascript';
-  }
-
-  // Python
-  if (/\bdef\s+\w+\s*\(.*\)\s*:/.test(src) || /\bprint\s*\(/.test(src) || /\bNone\b/.test(src) || /\bTrue\b|\bFalse\b/.test(src)) {
-    return 'python';
-  }
-
-  return null;
-}
 
 export default function InputPanel({ onSubmit, onExplain, isLoading, initialValues }) {
   const [code, setCode] = React.useState(initialValues?.code || '');
