@@ -10,7 +10,8 @@ import hashlib
 import asyncio
 from collections import OrderedDict
 
-from app.models.schemas import DebugRequest, DebugResponse
+from app.models.schemas import DebugRequest, DebugResponse, ExplainResponse
+from app.config import settings
 from app.services.vector_store import VectorStoreService
 from app.services.llm_service import LLMService
 
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 # Key: sha256(code + error + language)
 # Value: DebugResponse
 _DEBUG_CACHE = OrderedDict()
+_EXPLAIN_CACHE = OrderedDict()
 CACHE_LIMIT = 50
 CACHE_SCHEMA_VERSION = "v3"
 
@@ -168,6 +170,64 @@ class RAGService:
             if cache_key in self._inflight_requests:
                 del self._inflight_requests[cache_key]
 
+    async def explain(self, request: DebugRequest) -> ExplainResponse:
+        """Fast explain path — skips RAG retrieval and requests a smaller LLM response."""
+        code = (request.code or "").strip()
+        lang = (request.language or "python").strip().lower()
+
+        if not code:
+            return ExplainResponse(
+                explanation="No code provided. Paste a snippet to explain.",
+                confidence=1.0,
+                warning="Invalid or empty input detected.",
+                error_type="Invalid Input",
+            )
+
+        cache_key = hashlib.sha256(f"explain|{CACHE_SCHEMA_VERSION}|{code}|{lang}".encode()).hexdigest()
+        if cache_key in _EXPLAIN_CACHE:
+            logger.info(f"EXPLAIN CACHE HIT: {cache_key}")
+            return _EXPLAIN_CACHE[cache_key]
+
+        code_sample = code if len(code) <= 4000 else code[:4000] + "\n# ... (truncated)"
+        prompt = f"""Explain this {lang} code for a beginner. Return ONLY valid JSON with keys:
+"explanation" (concise walkthrough of what the code does, line-by-line where helpful),
+"confidence" (0.0-1.0),
+"error_type" (always "Explain Mode").
+
+Code:
+{code_sample}
+"""
+
+        try:
+            raw = await self._llm_service.agenerate(prompt, max_tokens=settings.explain_max_tokens)
+            parsed = self._parse_response(raw)
+            explanation = self._normalize_narrative_text(
+                parsed.get("explanation", "Explanation could not be generated.")
+            )
+            confidence = float(parsed.get("confidence", 0.85))
+            result = ExplainResponse(
+                explanation=explanation,
+                confidence=round(min(max(confidence, 0.0), 1.0), 2),
+                warning=None,
+                error_type=parsed.get("error_type", "Explain Mode"),
+            )
+        except Exception as e:
+            logger.error(f"Explain pipeline failure: {e}", exc_info=True)
+            result = ExplainResponse(
+                explanation=(
+                    "Could not reach the AI service right now. "
+                    "Review the code structure, variable flow, and control paths manually."
+                ),
+                confidence=0.5,
+                warning="AI unavailable — using fallback explanation",
+                error_type="Explain Mode",
+            )
+
+        if len(_EXPLAIN_CACHE) >= CACHE_LIMIT:
+            _EXPLAIN_CACHE.popitem(last=False)
+        _EXPLAIN_CACHE[cache_key] = result
+        return result
+
     async def _process_debug_request(
         self, 
         request: DebugRequest, 
@@ -197,32 +257,31 @@ class RAGService:
                 query = f"Code:\n{code}\n\nNo error is provided. Analyze logical bugs, runtime issues, and optimizations."
 
             # 3. Retrieve context
-            docs = self._vector_store.similarity_search(query, k=4)
+            docs = self._vector_store.similarity_search(query, k=settings.rag_top_k)
             context_snippets = [doc.page_content for doc in docs]
             context_text = "\n---\n".join(context_snippets) if context_snippets else "No relevant context found."
 
-            # 4. Build prompt & Call LLM
-            full_prompt = f"""
-Analyze the provided code and error. Return ONLY this STRICT JSON format:
-{{
-  "error_type": "Syntax Error | Runtime Error (Type) | Logical Error | Safe Code",
-  "confidence": 0.95,
-  "confidence_reason": "Professional reasoning",
-  "explanation": "Concise senior-engineer summary",
-  "line_by_line": "Line-by-line justification",
-  "fix": "Minimal correction only. If code is correct, use 'No changes needed'",
-  "optimized_code": "Best-practice version",
-  "why_fix_works": "Technical justification"
-}}
+            code_sample = code if len(code) <= 3000 else code[:3000] + "\n# ... (truncated)"
+            error_sample = error if len(error) <= 1500 else error[:1500] + "\n... (truncated)"
 
-4. DO NOT include markdown, comments, placeholders, or trailing ellipsis.
-5. Provide a direct, clean answer. NEVER end the response with 'undefined' or any state variables.
-Relevant context:
+            # 4. Build prompt & Call LLM
+            full_prompt = f"""Analyze this {lang} code and error. Return ONLY valid JSON with keys:
+error_type, confidence, confidence_reason, explanation, line_by_line, fix, optimized_code, why_fix_works.
+
+Rules: no markdown fences; keep explanation concise; use "No changes needed" when code is already correct.
+
+Context:
 {context_text}
 
-Input: {lang} | {code} | {error or "None"}
+Code:
+{code_sample}
+
+Error:
+{error_sample or "None"}
 """
-            raw_response = await self._llm_service.agenerate(full_prompt)
+            raw_response = await self._llm_service.agenerate(
+                full_prompt, max_tokens=settings.debug_max_tokens
+            )
             parsed = self._parse_response(raw_response)
 
             # Some model responses place a second JSON object inside "explanation".

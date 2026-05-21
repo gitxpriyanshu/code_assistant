@@ -19,6 +19,9 @@ class Settings(BaseSettings):
         default="llama-3.1-8b-instant",
         alias="MODEL_NAME",
     )
+    debug_max_tokens: int = Field(default=2048, alias="DEBUG_MAX_TOKENS")
+    explain_max_tokens: int = Field(default=768, alias="EXPLAIN_MAX_TOKENS")
+    rag_top_k: int = Field(default=2, alias="RAG_TOP_K")
     embedding_model: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
     )

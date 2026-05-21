@@ -4,7 +4,7 @@ import InputPanel from './components/InputPanel';
 import OutputPanel from './components/OutputPanel';
 import HistoryPanel from './components/HistoryPanel';
 import Background from './components/Background';
-import { debugCode, explainCode } from './services/api';
+import { debugCode, explainCode, healthCheck } from './services/api';
 import { getHistory, saveToHistory } from './utils/history';
 
 export default function App() {
@@ -22,6 +22,11 @@ export default function App() {
     }
     return true;
   });
+
+  // Wake up Render free-tier backend on page load to reduce first-request cold-start delay
+  useEffect(() => {
+    healthCheck().catch(() => {});
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;

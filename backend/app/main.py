@@ -44,7 +44,8 @@ async def lifespan(app: FastAPI):
     
     async def bg_init():
         try:
-            # Run the synchronous seeding in a separate thread so the server stays responsive
+            # Pre-load embeddings + FAISS index, then seed only if needed
+            await asyncio.to_thread(vector_store_service.warmup)
             await asyncio.to_thread(seed_knowledge_base, vector_store_service)
             logger.info("✅ AI Background Initialization Complete")
         except Exception as e:

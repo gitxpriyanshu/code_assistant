@@ -27,6 +27,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 def seed_knowledge_base(vector_store: VectorStoreService) -> None:
     """Load all .txt files from the knowledge directory and ingest them."""
 
+    vector_store.warmup()
+
     if not vector_store.is_empty:
         logger.info(
             f"Vector store already contains {vector_store.document_count} vectors — skipping seed"

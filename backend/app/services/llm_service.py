@@ -39,7 +39,7 @@ class LLMService:
             groq_api_key=api_key,
             model_name=settings.model_name,
             temperature=0.3,
-            max_tokens=4096,
+            max_tokens=settings.debug_max_tokens,
         )
         return self._llm
 
@@ -52,11 +52,12 @@ class LLMService:
             return self.initialize()
         return self._llm
 
-    async def agenerate(self, prompt: str) -> str:
+    async def agenerate(self, prompt: str, *, max_tokens: int | None = None) -> str:
         """Send a prompt to the LLM with automatic model fallback for 429 Rate Limits."""
+        token_limit = max_tokens or settings.debug_max_tokens
         try:
             # 1. Attempt Primary Request
-            response = await self.llm.ainvoke(prompt)
+            response = await self.llm.ainvoke(prompt, max_tokens=token_limit)
             return response.content
         except Exception as e:
             # 2. Check for Rate Limit (HTTP 429)
@@ -71,9 +72,9 @@ class LLMService:
                         groq_api_key=settings.groq_api_key,
                         model_name=fallback_model,
                         temperature=0.3,
-                        max_tokens=2048
+                        max_tokens=token_limit,
                     )
-                    response = await fallback_llm.ainvoke(prompt)
+                    response = await fallback_llm.ainvoke(prompt, max_tokens=token_limit)
                     return response.content
                 except Exception as fallback_err:
                     logger.error(f"Fallback model also failed: {fallback_err}")

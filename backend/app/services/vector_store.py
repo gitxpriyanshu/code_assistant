@@ -62,6 +62,18 @@ class VectorStoreService:
         """No-op for backward compatibility - initialization is now lazy."""
         logger.info("VectorStoreService ready (initialized on-demand)")
 
+    def warmup(self) -> None:
+        """Eagerly load embeddings + persisted FAISS index to avoid first-request latency."""
+        self._ensure_initialized()
+        if self._store is not None:
+            logger.info(f"Vector store warm — {self.document_count} vectors loaded")
+        else:
+            logger.info("Vector store warm — no persisted index on disk yet")
+
+    def has_persisted_index(self) -> bool:
+        index_path = Path(settings.faiss_index_path)
+        return (index_path / "index.faiss").exists()
+
     def add_documents(self, documents: list[Document]) -> None:
         """Add LangChain `Document` objects to the FAISS index and persist."""
         if not documents:

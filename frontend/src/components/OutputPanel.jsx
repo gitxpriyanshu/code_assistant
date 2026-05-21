@@ -124,9 +124,15 @@ ${safeClean(result.optimized_code)}
       return;
     }
 
-    if (result.isHistoryPreview || (result.warning && result.warning.includes("limit"))) {
+    if (result.isHistoryPreview || result.isExplain || (result.warning && result.warning.includes("limit"))) {
       setDisplayedExplanation(fullExp);
-      setVisibleSections({ explanation: true, sources: true, fix: true, why: true, opt: true });
+      setVisibleSections({
+        explanation: true,
+        sources: !result.isExplain && Boolean(result.sources?.length),
+        fix: !result.isExplain && Boolean(result.fix),
+        why: !result.isExplain && Boolean(result.why_fix_works),
+        opt: !result.isExplain && Boolean(result.optimized_code && result.optimized_code !== result.fix),
+      });
       return;
     }
 
@@ -147,7 +153,7 @@ ${safeClean(result.optimized_code)}
         clearInterval(typingTimerRef.current);
         revealNextSections();
       }
-    }, 10);
+    }, 3);
 
     return () => {
       if (typingTimerRef.current) clearInterval(typingTimerRef.current);
@@ -159,7 +165,7 @@ ${safeClean(result.optimized_code)}
     sequence.forEach((section, i) => {
       setTimeout(() => {
         setVisibleSections(prev => ({ ...prev, [section]: true }));
-      }, (i + 1) * 300); 
+      }, (i + 1) * 80);
     });
   };
 
@@ -189,6 +195,9 @@ ${safeClean(result.optimized_code)}
             <Loader2 className="animate-spin text-blue-500" size={20} />
             <Skeleton className="h-6 w-32" />
           </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            AI is analyzing your code. First request after idle may take 15–30s while the server wakes up.
+          </p>
           <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-5/6 mb-2" />
           <Skeleton className="h-4 w-4/6" />
